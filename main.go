@@ -76,6 +76,67 @@ func main() {
 		}
 	})
 
+	http.HandleFunc("/search", func(w http.ResponseWriter, r *http.Request) {
+
+		// Render the form page
+		t, err := template.New("search_form").Parse(searchForm)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		err = t.Execute(w, nil)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+	})
+
+	http.HandleFunc("/searchresults", func(w http.ResponseWriter, r *http.Request) {
+
+		if r.Method == "POST" {
+
+			// Parse the form data
+			err := r.ParseForm()
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+
+			name := r.FormValue("name")
+			shiftDate := r.FormValue("shift_date")
+
+			shiftTasks := []Shift{}
+
+			err = db.Select(&shiftTasks,
+				"select name,shift_type,shift_date,task,hours from shifts where name like $1 and shift_date = $2",
+				"%"+name+"%",
+				shiftDate,
+			)
+
+			if err != nil {
+				log.Println(err)
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+
+			t := template.Must(template.New("shiftTable").Parse(searchresults))
+
+			err = t.Execute(w, shiftTasks)
+			if err != nil {
+				log.Println(err)
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+
+			return
+
+		}
+
+		http.Redirect(w, r, "/search", http.StatusSeeOther)
+
+	})
+
 	// Start the server
 	log.Fatal(http.ListenAndServe(":8085", nil))
 }
