@@ -27,15 +27,26 @@ func handleAddTask(db *sqlx.DB) func(w http.ResponseWriter, r *http.Request) {
 				ShiftDate: r.FormValue("shift_date"),
 				ShiftType: r.FormValue("shift_type"),
 				Task:      r.FormValue("task"),
+				TaskType:  r.FormValue("task_type"),
+
 				Hours: func() int {
 					hours, _ := strconv.Atoi(r.FormValue("hours"))
 					return hours
 				}(),
+				Minutes: func() int {
+					minutes, _ := strconv.Atoi(r.FormValue("minutes"))
+					return minutes
+
+				}(),
 			}
 
+			
+
 			// Insert the shift data into the database
-			_, err = db.NamedExec(`INSERT INTO shifts (name, shift_date, shift_type, task, hours) VALUES (:name, :shift_date, :shift_type, :task, :hours)`, shift)
+			_, err = db.NamedExec(`INSERT INTO shifts (name, shift_date, shift_type, task_type,task, hours,minutes) 
+			VALUES (:name, :shift_date, :shift_type,:task_type, :task, :hours,:minutes)`, shift)
 			if err != nil {
+
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
 			}
@@ -97,7 +108,7 @@ func searchResults(db *sqlx.DB) func(w http.ResponseWriter, r *http.Request) {
 			shiftTasks := []Shift{}
 
 			err = db.Select(&shiftTasks,
-				"select name,shift_type,shift_date,task,hours from shifts where name like $1 and shift_date = $2",
+				"select name,shift_type,shift_date,task,task_type,hours,minutes from shifts where name like $1 and shift_date = $2",
 				"%"+name+"%",
 				shiftDate,
 			)

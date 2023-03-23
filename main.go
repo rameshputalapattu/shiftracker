@@ -14,7 +14,9 @@ type Shift struct {
 	ShiftDate string `db:"shift_date"`
 	ShiftType string `db:"shift_type"`
 	Task      string `db:"task"`
+	TaskType  string `db:"task_type"`
 	Hours     int    `db:"hours"`
+	Minutes   int    `db:"minutes"`
 }
 
 func main() {

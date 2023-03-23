@@ -6,7 +6,7 @@ var formHTML = `<!DOCTYPE html>
         <title>DAE Shift tracker</title>
     </head>
     <body>
-        <h1>Add Shift</h1>
+        <h1>Add Shift Task</h1>
         <form method="post" action="/">
             <label for="name">Name:</label>
             <input type="text" name="name" required><br>
@@ -42,7 +42,7 @@ var formHTML = `<!DOCTYPE html>
             <label for="minutes">Minutes:</label>
             <input type="number" name="minutes" min="0" max="59" required><br>
 
-            <input type="submit" value="Add Shift">
+            <input type="submit" value="Add Shift Task">
         </form>
     </body>
 </html>`

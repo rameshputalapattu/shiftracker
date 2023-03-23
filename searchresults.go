@@ -26,9 +26,12 @@ var searchresults = `<!DOCTYPE html>
             <tr>
                 <th>Name</th>
                 <th>Shift Date</th>
+                <th>Shift Type</th>
+                <th>Task Type</th>
                 <th>Task</th>
                 <th>Hours</th>
-                <th>Shift Type</th>
+                <th>Minutes</th>
+                
             </tr>
         </thead>
         <tbody>
@@ -36,9 +39,12 @@ var searchresults = `<!DOCTYPE html>
             <tr>
                 <td>{{.Name}}</td>
                 <td>{{.ShiftDate}}</td>
+                <td>{{.ShiftType}}</td>
+                <td>{{.TaskType}}</td>
                 <td>{{.Task}}</td>
                 <td>{{.Hours}}</td>
-                <td>{{.ShiftType}}</td>
+                <td>{{.Minutes}}</td>
+                
             </tr>
             {{end}}
         </tbody>
