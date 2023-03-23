@@ -22,12 +22,25 @@ var formHTML = `<!DOCTYPE html>
                 <option value="night">night</option>
             </select><br>
 
+            <label for="task_type">Task Type:</label>
+            <select name="task_type" required>
+                <option value="monitoring">monitoring</option>
+                <option value="ticket triaging">ticket triaging</option>
+                <option value="meeting">meeting</option>
+                <option value="failure handling">failure handling</option>
+                <option value="automation development">automation development</option>
+                <option value="others">others</option>
+            </select><br>
+
             <label for="Task">Enter your Task:</label><br>
 <textarea name="task" id="task" rows="10" cols="80" required></textarea><br>
 
 
             <label for="hours">Hours:</label>
-            <input type="number" name="hours" min="1" max="12" required><br>
+            <input type="number" name="hours" min="0" max="12" required><br>
+
+            <label for="minutes">Minutes:</label>
+            <input type="number" name="minutes" min="0" max="59" required><br>
 
             <input type="submit" value="Add Shift">
         </form>
