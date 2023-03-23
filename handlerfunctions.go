@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"html/template"
 	"log"
 	"net/http"
@@ -121,6 +122,48 @@ func searchResults(db *sqlx.DB) func(w http.ResponseWriter, r *http.Request) {
 		}
 
 		http.Redirect(w, r, "/search", http.StatusSeeOther)
+
+	}
+}
+
+func backupTable(db *sqlx.DB) func(w http.ResponseWriter, r *http.Request) {
+
+	return func(w http.ResponseWriter, r *http.Request) {
+
+		db.MustExec(`
+		drop table if exists shifts_bkp;
+		CREATE table shifts_bkp as select * from shifts;
+		
+		
+		`)
+
+		fmt.Fprintln(w, "backed up the table successfully")
+
+	}
+
+}
+
+func migrateTable(db *sqlx.DB) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		db.MustExec(`
+		drop table if exists shifts;
+		CREATE TABLE IF NOT EXISTS shifts (
+			id INTEGER PRIMARY KEY AUTOINCREMENT,
+			name TEXT,
+			shift_date TEXT,
+			shift_type TEXT,
+			task TEXT,
+			task_type TEXT,
+
+			hours INTEGER default 0,
+			minutes INTEGER default 0,
+			created_timestamp TIMESTAMP default CURRENT_TIMESTAMP
+		);
+		insert into shifts(name,shift_date,shift_type,task,hours)
+		select name,shift_date,shift_type,task,hours from shifts_bkp;
+`)
+
+		fmt.Fprintln(w, "migration completed successfully")
 
 	}
 }

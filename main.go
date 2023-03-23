@@ -33,6 +33,8 @@ func main() {
 	http.HandleFunc("/search", searchHandler())
 
 	http.HandleFunc("/searchresults", searchResults(db))
+	http.HandleFunc("/backuptable", backupTable(db))
+	http.HandleFunc("/migratetable", migrateTable(db))
 
 	// Start the server
 	log.Fatal(http.ListenAndServe(":8085", nil))
