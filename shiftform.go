@@ -30,6 +30,7 @@ var formHTML = `<!DOCTYPE html>
                 <option value="meeting">meeting</option>
                 <option value="failure handling">failure handling</option>
                 <option value="automation development">automation development</option>
+                <option value="release support">release support</option>
                 <option value="others">others</option>
             </select><br>
 
