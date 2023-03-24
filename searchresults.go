@@ -35,7 +35,7 @@ var searchresults = `<!DOCTYPE html>
             </tr>
         </thead>
         <tbody>
-            {{range .}}
+            {{range .ShiftTasks}}
             <tr>
                 <td>{{.Name}}</td>
                 <td>{{.ShiftDate}}</td>
@@ -49,7 +49,9 @@ var searchresults = `<!DOCTYPE html>
             {{end}}
         </tbody>
     </table>
-	<a href="/search">Back to search</a>
+    <h2>Total Hours: {{.TotalHours}}</h2>
+	<a href="/search">Back to search</a><br>
+    <a href="/">Back to Add Shift Task</a>
 	</body>
 	</html>
 	`

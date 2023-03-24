@@ -21,6 +21,11 @@ type Shift struct {
 	Minutes   int    `db:"minutes"`
 }
 
+type SearchResult struct {
+	ShiftTasks []Shift
+	TotalHours float64
+}
+
 func main() {
 
 	if len(os.Args) <= 1 {

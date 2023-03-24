@@ -120,10 +120,25 @@ func searchResults(db *sqlx.DB) func(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 
+			th, err := totalHours(db, name, shiftDate)
+
+			if err != nil {
+
+				log.Println(err)
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+
+			searchResults := SearchResult{
+				ShiftTasks: shiftTasks,
+				TotalHours: th,
+			}
+
 			t := template.Must(template.New("shiftTable").Parse(searchresults))
 
-			err = t.Execute(w, shiftTasks)
+			err = t.Execute(w, searchResults)
 			if err != nil {
+
 				log.Println(err)
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
@@ -206,5 +221,22 @@ func backupDatabase(dbPath string) func(w http.ResponseWriter, r *http.Request) 
 		fmt.Fprintf(w, "backup successful")
 
 	}
+
+}
+
+func totalHours(db *sqlx.DB, name string, shiftDate string) (float64, error) {
+	var totalHours float64
+	query := `
+	SELECT ROUND(sum(hours + (minutes/60.0)), 2) AS total_hours FROM shifts
+	where name like $1 and shift_date = $2
+	`
+
+	err := db.Get(&totalHours,
+		query,
+		"%"+name+"%",
+		shiftDate,
+	)
+
+	return totalHours, err
 
 }
