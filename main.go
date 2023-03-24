@@ -3,6 +3,8 @@ package main
 import (
 	"log"
 	"net/http"
+	"os"
+	"path/filepath"
 
 	"github.com/jmoiron/sqlx"
 	_ "github.com/mattn/go-sqlite3"
@@ -20,8 +22,14 @@ type Shift struct {
 }
 
 func main() {
+
+	if len(os.Args) <= 1 {
+		log.Fatal("Usage: ./shiftform <dbPath>")
+	}
+
+	dbPath := os.Args[1]
 	// Open the database
-	db, err := sqlx.Open("sqlite3", "shifts.db")
+	db, err := sqlx.Open("sqlite3", filepath.Join(dbPath, "shifts.db"))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -37,6 +45,7 @@ func main() {
 	http.HandleFunc("/searchresults", searchResults(db))
 	http.HandleFunc("/backuptable", backupTable(db))
 	http.HandleFunc("/migratetable", migrateTable(db))
+	http.HandleFunc("/backupdatabase", backupDatabase(dbPath))
 
 	// Start the server
 	log.Fatal(http.ListenAndServe(":8085", nil))

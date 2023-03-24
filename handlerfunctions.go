@@ -3,8 +3,11 @@ package main
 import (
 	"fmt"
 	"html/template"
+	"io"
 	"log"
 	"net/http"
+	"os"
+	"path/filepath"
 	"strconv"
 
 	"github.com/jmoiron/sqlx"
@@ -39,8 +42,6 @@ func handleAddTask(db *sqlx.DB) func(w http.ResponseWriter, r *http.Request) {
 
 				}(),
 			}
-
-			
 
 			// Insert the shift data into the database
 			_, err = db.NamedExec(`INSERT INTO shifts (name, shift_date, shift_type, task_type,task, hours,minutes) 
@@ -177,4 +178,33 @@ func migrateTable(db *sqlx.DB) func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintln(w, "migration completed successfully")
 
 	}
+}
+
+func backupDatabase(dbPath string) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		tgt, err := os.Create(filepath.Join(dbPath, "shifts_bkp.db"))
+
+		if err != nil {
+			log.Println(err)
+			return
+		}
+
+		defer tgt.Close()
+
+		src, err := os.Open(filepath.Join(dbPath, "shifts.db"))
+		if err != nil {
+			log.Println(err)
+			return
+		}
+		defer src.Close()
+		_, err = io.Copy(tgt, src)
+		if err != nil {
+			log.Println(err)
+			return
+		}
+
+		fmt.Fprintf(w, "backup successful")
+
+	}
+
 }

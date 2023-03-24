@@ -20,6 +20,7 @@ var formHTML = `<!DOCTYPE html>
                 <option value="first">first</option>
                 <option value="second">second</option>
                 <option value="night">night</option>
+                <option value="onshore">onshore</option>
             </select><br>
 
             <label for="task_type">Task Type:</label>
