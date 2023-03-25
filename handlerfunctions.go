@@ -11,9 +11,14 @@ import (
 	"path/filepath"
 	"strconv"
 
+	"embed"
+
 	"github.com/jmoiron/sqlx"
 	"github.com/xuri/excelize/v2"
 )
+
+//go:embed shiftform.html
+var shiftformPage embed.FS
 
 func handleAddTask(db *sqlx.DB) func(w http.ResponseWriter, r *http.Request) {
 
@@ -60,7 +65,7 @@ func handleAddTask(db *sqlx.DB) func(w http.ResponseWriter, r *http.Request) {
 		}
 
 		// Render the form page
-		t, err := template.New("form").Parse(formHTML)
+		t, err := template.ParseFS(shiftformPage, "shiftform.html")
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -72,13 +77,17 @@ func handleAddTask(db *sqlx.DB) func(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 }
+
+//go:embed searchform.html
+var searchformPage embed.FS
 
 func searchHandler() func(w http.ResponseWriter, r *http.Request) {
 
 	return func(w http.ResponseWriter, r *http.Request) {
 
 		// Render the form page
-		t, err := template.New("search_form").Parse(searchForm)
+
+		t, err := template.ParseFS(searchformPage, "searchform.html")
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -92,6 +101,9 @@ func searchHandler() func(w http.ResponseWriter, r *http.Request) {
 	}
 
 }
+
+//go:embed searchresults.html
+var searchResultsPage embed.FS
 
 func searchResults(db *sqlx.DB) func(w http.ResponseWriter, r *http.Request) {
 
@@ -136,7 +148,7 @@ func searchResults(db *sqlx.DB) func(w http.ResponseWriter, r *http.Request) {
 				TotalHours: th,
 			}
 
-			t := template.Must(template.New("shiftTable").Parse(searchresults))
+			t := template.Must(template.ParseFS(searchResultsPage, "searchresults.html"))
 
 			err = t.Execute(w, searchResults)
 			if err != nil {
@@ -314,4 +326,28 @@ func downloadTasks(db *sqlx.DB) func(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+}
+
+//go:embed landing.html
+var landingPage embed.FS
+
+func landingPageHandler() func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		// Read the contents of the embedded HTML file
+		htmlContent, err := landingPage.ReadFile("landing.html")
+		if err != nil {
+			http.Error(w, "Error reading file", http.StatusInternalServerError)
+			return
+		}
+
+		// Set the response header
+		w.Header().Set("Content-Type", "text/html")
+
+		// Write the HTML content to the response
+		_, err = w.Write(htmlContent)
+		if err != nil {
+			http.Error(w, "Error writing response", http.StatusInternalServerError)
+			return
+		}
+	}
 }
