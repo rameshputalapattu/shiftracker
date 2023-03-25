@@ -51,6 +51,7 @@ func main() {
 	http.HandleFunc("/backuptable", backupTable(db))
 	http.HandleFunc("/migratetable", migrateTable(db))
 	http.HandleFunc("/backupdatabase", backupDatabase(dbPath))
+	http.HandleFunc("/downloadtasks", downloadTasks(db))
 
 	// Start the server
 	log.Fatal(http.ListenAndServe(":8085", nil))

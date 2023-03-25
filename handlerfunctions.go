@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"html/template"
 	"io"
@@ -11,6 +12,7 @@ import (
 	"strconv"
 
 	"github.com/jmoiron/sqlx"
+	"github.com/xuri/excelize/v2"
 )
 
 func handleAddTask(db *sqlx.DB) func(w http.ResponseWriter, r *http.Request) {
@@ -238,5 +240,78 @@ func totalHours(db *sqlx.DB, name string, shiftDate string) (float64, error) {
 	)
 
 	return totalHours, err
+
+}
+
+func downloadTasks(db *sqlx.DB) func(w http.ResponseWriter, r *http.Request) {
+
+	return func(w http.ResponseWriter, r *http.Request) {
+
+		// Retrieve all the rows from the "shifts" table
+		shifts := []Shift{}
+		err := db.SelectContext(context.Background(), &shifts, "SELECT name, shift_date, shift_type, task_type, task, hours, minutes FROM shifts")
+		if err != nil {
+
+			http.Error(w, "Internal server error", http.StatusInternalServerError)
+			return
+		}
+
+		// Create a new Excel file
+		file := excelize.NewFile()
+
+		// Add a new sheet
+		sheetName := "Sheet1"
+		_, err = file.NewSheet(sheetName)
+		if err != nil {
+			http.Error(w, "Internal server error", http.StatusInternalServerError)
+			return
+		}
+
+		// Set the headers for the sheet
+
+		sytleBoldID, _ := file.NewStyle(&excelize.Style{Font: &excelize.Font{
+			Bold: true,
+		}})
+		headers := []string{"Name", "Shift Date", "Shift Type", "Task Type", "Task", "Hours", "Minutes"}
+		for i, header := range headers {
+
+			cellName, _ := excelize.CoordinatesToCellName(i+1, 1)
+
+			file.SetCellValue(sheetName, cellName, header)
+			file.SetCellStyle(sheetName, cellName, cellName, sytleBoldID)
+		}
+
+		// Add the rows to the sheet
+		for i, shift := range shifts {
+			row := []interface{}{
+				shift.Name,
+				shift.ShiftDate,
+				shift.ShiftType,
+				shift.TaskType,
+				shift.Task,
+				shift.Hours,
+				shift.Minutes,
+			}
+			rowIndex := i + 2
+			for j, cellValue := range row {
+
+				cellName, _ := excelize.CoordinatesToCellName(j+1, rowIndex)
+				file.SetCellValue(sheetName, cellName, cellValue)
+			}
+		}
+
+		// Set the content type header for the response
+		w.Header().Set("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+
+		// Set the content disposition header to force a download
+		w.Header().Set("Content-Disposition", "attachment; filename=\"shifts.xlsx\"")
+
+		// Write the Excel file to the response writer
+		err = file.Write(w)
+		if err != nil {
+			http.Error(w, "Internal server error", http.StatusInternalServerError)
+			return
+		}
+	}
 
 }
